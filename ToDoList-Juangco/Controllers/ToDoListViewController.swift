@@ -16,7 +16,7 @@ import UIKit
 
 class ToDoListViewController: UITableViewController {
     
-    var itemArray = ["Find Me Mym", "My dog stepped on a bee", "OBJECTION HEARSAY"]
+    var itemArray = [Item]()
     
     let defaults = UserDefaults.standard
 
@@ -25,6 +25,18 @@ class ToDoListViewController: UITableViewController {
         // Do any additional setup after loading the view.
         navigationController?.navigationBar.prefersLargeTitles = true
         
+        let newItem1 = Item(title: "Find me Mym")
+        itemArray.append(newItem1)
+        
+        let newItem2 = Item(title: "MY DOG STEPPED ON A BEE")
+        itemArray.append(newItem2)
+        
+        let newItem3 = Item(title: "OBJECTION HEARSAY")
+        itemArray.append(newItem3)
+        
+        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
+            itemArray = items
+        }
     }
     
     //MARK:- Tableview Datasource Methods
@@ -38,10 +50,21 @@ class ToDoListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: K.toDoItemCellRI, for: indexPath)
         var cellConfig = cell.defaultContentConfiguration()
         
-        cellConfig.text = itemArray[indexPath.row]
+        let item = itemArray[indexPath.row]
+        cellConfig.text = item.title
+        
+        // Ternary operator
+        // value = condition ? valueIfTrue : valueIfFalse
+        
+        // cell.accessoryType = item.done == true ? .checkmark : .none
+        
+        // OR
+        
+        cell.accessoryType = item.done ? .checkmark : .none
         
         cell.contentConfiguration = cellConfig
         
@@ -52,13 +75,9 @@ class ToDoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        // print("Index path: \(indexPath.row), Item name: \(itemArray[indexPath.row])")
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
+        tableView.reloadData()
         
         tableView.deselectRow(at: indexPath, animated: true)
         
@@ -93,7 +112,9 @@ class ToDoListViewController: UITableViewController {
                 } else {
                     
                     print(safeText)
-                    itemArray.append(safeText)
+                    let newItem = Item()
+                    newItem.title = safeText
+                    itemArray.append(newItem)
                     defaults.set(itemArray, forKey: "TodoListArray")
                     tableView.reloadData()
                     
